@@ -4,14 +4,20 @@ import {
   getProduct,
   createProduct,
   updateProduct,
+  deleteProduct,
 } from "../controllers/product.controller.js";
-import { validateProduct } from "../middleware/product.validate.js";
+import {
+  validateCreateProduct,
+  validateDeleteProduct,
+  validateUpdateProduct,
+} from "../middleware/product.validate.js";
 
-const router: Router = Router();
+const routerProducts: Router = Router();
 
-router.get("/menu", getMenu);
-router.get("/menu/:id", getProduct);
-router.post("/menu", validateProduct, createProduct);
-router.put("/menu/:id", updateProduct);
+routerProducts.get("/menu", getMenu);
+routerProducts.get("/menu/:id", getProduct);
+routerProducts.post("/menu", validateCreateProduct, createProduct);
+routerProducts.put("/menu/:id", validateUpdateProduct, updateProduct);
+routerProducts.delete("/menu/:id", validateDeleteProduct, deleteProduct);
 
-export default router;
+export default routerProducts;

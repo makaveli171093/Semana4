@@ -43,3 +43,10 @@ export const updateProduct = async (
   );
   return result.rows[0] || null;
 };
+export const deleteProduct = async (id: number): Promise<boolean> => {
+  const resultado = await pool.query(
+    "DELETE FROM product WHERE id = $1 RETURNING id",
+    [id],
+  );
+  return (resultado.rowCount ?? 0) > 0;
+};
