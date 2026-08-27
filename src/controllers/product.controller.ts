@@ -1,10 +1,5 @@
 import type { Request, Response } from "express";
-import {
-  getAllProducts,
-  getProductById,
-  insertProduct,
-  updateProduct as updateProductModel,
-} from "../models/product.model.js";
+import * as ProductModel from "../models/product.model.js";
 
 export const getMenu = async (req: Request, res: Response) => {
   /* 
@@ -12,7 +7,7 @@ export const getMenu = async (req: Request, res: Response) => {
     #swagger.summary = 'Obtener todos los productos del menú'
   */
   try {
-    const products = await getAllProducts();
+    const products = await ProductModel.getAllProducts();
     return res.json(products);
   } catch (error) {
     console.error("Error al obtener productos:", error);
@@ -32,7 +27,7 @@ export const getProduct = async (req: Request, res: Response) => {
   */
   try {
     const id = Number(req.params.id);
-    const product = await getProductById(id);
+    const product = await ProductModel.getProductById(id);
 
     if (!product) {
       return res.status(404).json({ error: "Producto no encontrado" });
@@ -70,7 +65,7 @@ export const createProduct = async (req: Request, res: Response) => {
       });
     }
 
-    const newProduct = await insertProduct(
+    const newProduct = await ProductModel.insertProduct(
       name,
       descript,
       Number(price),
@@ -108,7 +103,7 @@ export const updateProduct = async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const { name, descript, price, available } = req.body;
 
-    const updatedProduct = await updateProductModel(
+    const updatedProduct = await ProductModel.updateProduct(
       id,
       name,
       descript,
@@ -124,5 +119,33 @@ export const updateProduct = async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error al actualizar producto:", error);
     return res.status(500).json({ error: "Error al actualizar el producto" });
+  }
+};
+export const deleteProduct = async (req: Request, res: Response) => {
+  /* 
+    #swagger.tags = ['Products']
+    #swagger.summary = 'Eliminar un producto por ID'
+    #swagger.parameters['id'] = {
+      in: 'path',
+      description: 'ID del producto a eliminar',
+      required: true,
+      type: 'number',
+      example: 1
+    }
+  */
+  try {
+    const id = Number(req.params.id);
+    console.log(id);
+
+    const eliminado = await ProductModel.deleteProduct(id);
+    console.log(eliminado);
+
+    if (!eliminado) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
+    return res.json({ message: "Producto eliminado satisfactoriamente" });
+  } catch (error) {
+    console.error("ERROR EXACTO EN POSTGRESQL:", error);
+    return res.status(500).json({ error: "Error al eliminar el producto" });
   }
 };
