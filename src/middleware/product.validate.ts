@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { Request, Response, NextFunction } from "express";
 
-export const createProductSchema = z.object({
+export const productSchema = z.object({
   name: z
     .string({ message: "el nombre debe ser string" })
     .trim()
@@ -20,46 +20,30 @@ export const createProductSchema = z.object({
     .optional(),
 });
 
-export const updateProductSchema = createProductSchema
+export const updateProductSchema = productSchema
   .partial()
   .refine((data) => Object.keys(data).length > 0, {
     message: "Debes enviar al menos un dato para actualizar",
   });
 
-export function validateCreateProduct(
+export function validateProduct(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
-  const resultado = createProductSchema.safeParse(req.body);
-  if (!resultado.success) {
+  const result = productSchema.safeParse(req.body);
+
+  if (!result.success) {
     return res.status(400).json({
       error: "Datos de entrada inválidos",
-      detalles: resultado.error.issues.map((issue) => ({
+      detalles: result.error.issues.map((issue) => ({
         campo: issue.path.join("."),
         mensaje: issue.message,
       })),
     });
   }
-  req.body = resultado.data;
-  next();
-}
-export function validateUpdateProduct(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  const resultado = updateProductSchema.safeParse(req.body);
-  if (!resultado.success) {
-    return res.status(400).json({
-      error: "Datos de entrada inválidos",
-      detalles: resultado.error.issues.map((issue) => ({
-        campo: issue.path.join("."),
-        mensaje: issue.message,
-      })),
-    });
-  }
-  req.body = resultado.data;
+
+  req.body = result.data;
   next();
 }
 export function validateDeleteProduct(

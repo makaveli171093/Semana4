@@ -11,13 +11,33 @@
     "http"
   ],
   "paths": {
-    "/api/menu": {
+    "/api/products/menu": {
       "get": {
         "tags": [
           "Products"
         ],
-        "summary": "Obtener todos los productos del menú",
+        "summary": "Obtener productos con filtros y paginación",
         "description": "",
+        "parameters": [
+          {
+            "name": "maxPrice",
+            "in": "query",
+            "type": "number",
+            "description": "Precio máximo"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "number",
+            "description": "Página (default: 1)"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "type": "number",
+            "description": "Límite (default: 10)"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -81,7 +101,7 @@
         }
       }
     },
-    "/api/menu/{id}": {
+    "/api/products/menu/{id}": {
       "get": {
         "tags": [
           "Products"
@@ -196,7 +216,7 @@
         }
       }
     },
-    "/api/customers": {
+    "/api/customers/customers": {
       "get": {
         "tags": [
           "Customers"
@@ -261,7 +281,7 @@
         }
       }
     },
-    "/api/customers/{id}": {
+    "/api/customers/customers/{id}": {
       "get": {
         "tags": [
           "Customers"
@@ -361,6 +381,117 @@
             "type": "number",
             "description": "ID del cliente a eliminar",
             "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/sales/sales": {
+      "get": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Obtener todas las ventas con el nombre del cliente",
+        "description": "",
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Registrar una venta con items (Transacción)",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id_customer": {
+                  "type": "number",
+                  "example": 7
+                },
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id_product": {
+                        "type": "number",
+                        "example": 12
+                      },
+                      "quantity": {
+                        "type": "number",
+                        "example": 2
+                      },
+                      "unit_price": {
+                        "type": "number",
+                        "example": 5
+                      }
+                    },
+                    "required": [
+                      "id_product",
+                      "quantity",
+                      "unit_price"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "id_customer",
+                "items"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/api/sales/sales/{id}": {
+      "get": {
+        "tags": [
+          "Sales"
+        ],
+        "summary": "Obtener una venta por ID",
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "number"
           }
         ],
         "responses": {

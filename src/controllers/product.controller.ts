@@ -4,10 +4,23 @@ import * as ProductModel from "../models/product.model.js";
 export const getMenu = async (req: Request, res: Response) => {
   /* 
     #swagger.tags = ['Products']
-    #swagger.summary = 'Obtener todos los productos del menú'
+    #swagger.summary = 'Obtener productos con filtros y paginación'
+    #swagger.parameters['maxPrice'] = { in: 'query', type: 'number', description: 'Precio máximo' }
+    #swagger.parameters['page'] = { in: 'query', type: 'number', description: 'Página (default: 1)' }
+    #swagger.parameters['limit'] = { in: 'query', type: 'number', description: 'Límite (default: 10)' }
   */
   try {
-    const products = await ProductModel.getAllProducts();
+    const maxPrice = req.query.maxPrice
+      ? Number(req.query.maxPrice)
+      : undefined;
+    const page = req.query.page ? Number(req.query.page) : 1;
+    const limit = req.query.limit ? Number(req.query.limit) : 10;
+
+    const products = await ProductModel.getAllProducts({
+      maxPrice,
+      page,
+      limit,
+    });
     return res.json(products);
   } catch (error) {
     console.error("Error al obtener productos:", error);
@@ -57,21 +70,8 @@ export const createProduct = async (req: Request, res: Response) => {
     }
   */
   try {
-    const { name, descript, price, available } = req.body;
-
-    if (!name || !descript || price === undefined || available === undefined) {
-      return res.status(400).json({
-        error: "Todos los campos (name, descript, price) son obligatorios",
-      });
-    }
-
-    const newProduct = await ProductModel.insertProduct(
-      name,
-      descript,
-      Number(price),
-      Number(available),
-    );
-    return res.status(201).json(newProduct);
+    const nuevoProducto = await ProductModel.createProduct(req.body);
+    return res.status(201).json(nuevoProducto);
   } catch (error) {
     console.error("Error al crear producto:", error);
     return res.status(500).json({ error: "Error al guardar el producto" });
@@ -103,13 +103,11 @@ export const updateProduct = async (req: Request, res: Response) => {
     const id = Number(req.params.id);
     const { name, descript, price, available } = req.body;
 
-    const updatedProduct = await ProductModel.updateProduct(
-      id,
-      name,
-      descript,
-      Number(price),
-      Number(available),
-    );
+    if (isNaN(id) || id <= 0) {
+      return res.status(400).json({ error: "ID de producto inválido" });
+    }
+
+    const updatedProduct = await ProductModel.updateProduct(id, req.body);
 
     if (!updatedProduct) {
       return res.status(404).json({ error: "Producto no encontrado" });
@@ -135,17 +133,20 @@ export const deleteProduct = async (req: Request, res: Response) => {
   */
   try {
     const id = Number(req.params.id);
-    console.log(id);
-
     const eliminado = await ProductModel.deleteProduct(id);
-    console.log(eliminado);
 
     if (!eliminado) {
       return res.status(404).json({ error: "Producto no encontrado" });
     }
-    return res.json({ message: "Producto eliminado satisfactoriamente" });
-  } catch (error) {
-    console.error("ERROR EXACTO EN POSTGRESQL:", error);
+
+    return res.json({ mensaje: "Producto eliminado exitosamente" });
+  } catch (error: any) {
+    if (error.code === "23001" || error.code === "23503") {
+      return res.status(400).json({
+        error:
+          "No se puede eliminar el producto porque está asociado a ventas existentes",
+      });
+    }
     return res.status(500).json({ error: "Error al eliminar el producto" });
   }
 };

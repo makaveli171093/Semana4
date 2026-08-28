@@ -7,17 +7,16 @@ import {
   deleteProduct,
 } from "../controllers/product.controller.js";
 import {
-  validateCreateProduct,
+  validateProduct,
   validateDeleteProduct,
-  validateUpdateProduct,
 } from "../middleware/product.validate.js";
 
 const routerProducts: Router = Router();
 
 routerProducts.get("/menu", getMenu);
 routerProducts.get("/menu/:id", getProduct);
-routerProducts.post("/menu", validateCreateProduct, createProduct);
-routerProducts.put("/menu/:id", validateUpdateProduct, updateProduct);
+routerProducts.post("/menu", validateProduct, createProduct);
+routerProducts.put("/menu/:id", validateProduct, updateProduct);
 routerProducts.delete("/menu/:id", validateDeleteProduct, deleteProduct);
 
 export default routerProducts;
